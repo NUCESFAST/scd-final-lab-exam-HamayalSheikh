@@ -4,6 +4,8 @@ metadata:
   name: mongodb-deployment-1125
   labels:
     app: mongodb-1125
+  annotations:
+    description: "MongoDB deployment for application"
 spec:
   replicas: 1
   selector:
@@ -13,6 +15,8 @@ spec:
     metadata:
       labels:
         app: mongodb-1125
+      annotations:
+        description: "Pod template for MongoDB deployment"
     spec:
       containers:
       - name: mongodb
@@ -20,25 +24,35 @@ spec:
         ports:
         - containerPort: 27017
         volumeMounts:
-        - name: mongo-data2
+        - name: mongo-data
           mountPath: /data/db
+        resources:
+          requests:
+            memory: "1Gi"
+            cpu: "500m"
+          limits:
+            memory: "2Gi"
+            cpu: "1"
+        livenessProbe:
+          exec:
+            command:
+            - "mongo"
+            - "--eval"
+            - "db.adminCommand('ping')"
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          exec:
+            command:
+            - "mongo"
+            - "--eval"
+            - "db.adminCommand('ping')"
+          initialDelaySeconds: 5
+          periodSeconds: 10
       volumes:
-      - name: mongo-data2
+      - name: mongo-data
         persistentVolumeClaim:
           claimName: mongo-pvc-1125
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: mongodb-service-1125
-spec:
-  selector:
-    app: mongodb-1125
-  ports:
-  - protocol: TCP
-    port: 27017
-    targetPort: 27017
-  type: ClusterIP
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -50,3 +64,20 @@ spec:
   resources:
     requests:
       storage: 5Gi
+  volumeName: new-mongo-pv-1125
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: new-mongo-pv-1125
+  labels:
+    app: mongodb-1125
+  annotations:
+    description: "Persistent volume for MongoDB"
+spec:
+  capacity:
+    storage: 5Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/path/to/your/new_mongo_data"

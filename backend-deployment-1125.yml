@@ -4,6 +4,8 @@ metadata:
   name: backend-deployment-1125
   labels:
     app: backend-1125
+  annotations:
+    description: "Backend deployment for application"
 spec:
   replicas: 3
   selector:
@@ -13,17 +15,42 @@ spec:
     metadata:
       labels:
         app: backend-1125
+      annotations:
+        description: "Pod template for backend deployment"
     spec:
       containers:
       - name: backend
         image: your-dockerhub-username/backend:latest
         ports:
         - containerPort: 3125
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "500m"
+          limits:
+            memory: "1Gi"
+            cpu: "1"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 3125
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 3125
+          initialDelaySeconds: 5
+          periodSeconds: 10
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: backend-service-1125
+  labels:
+    app: backend-1125
+  annotations:
+    description: "Service for backend deployment"
 spec:
   selector:
     app: backend-1125
