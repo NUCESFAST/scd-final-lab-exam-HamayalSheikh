@@ -2,8 +2,9 @@ pipeline {
     agent any
 
     environment {
-        DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials-id') // Replace with your Jenkins credentials ID for Docker Hub
-        GITHUB_CREDENTIALS = credentials('github-credentials-id') // Replace with your Jenkins credentials ID for GitHub
+        DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials-id')
+        GITHUB_CREDENTIALS = credentials('github-credentials-id')
+        KUBECONFIG_CREDENTIALS = credentials('kubeconfig-credentials-id') // Add your Kubernetes credentials ID
         ROLL_NUMBER = '1125'
     }
 
@@ -12,7 +13,7 @@ pipeline {
             steps {
                 script {
                     echo 'Checking out code from GitHub...'
-                    git credentialsId: "${env.GITHUB_CREDENTIALS}", url: 'https://github.com/your-github-username/your-repo.git' // Replace with your repo URL
+                    git credentialsId: "${env.GITHUB_CREDENTIALS}", url: 'https://github.com/your-github-username/your-repo.git'
                 }
             }
         }
@@ -73,12 +74,26 @@ pipeline {
             }
         }
 
-        stage('Deploy_and_Validate_1125') {
+        stage('Deploy_to_Kubernetes_1125') {
             steps {
                 script {
-                    echo 'Deploying and validating the application...'
-                    // Here you could run docker-compose up or kubectl apply commands to deploy the application
-                    // Then run tests or checks to validate the deployment
+                    echo 'Deploying to Kubernetes...'
+                    withCredentials([file(credentialsId: 'kubeconfig-credentials-id', variable: 'KUBECONFIG')]) {
+                        sh 'kubectl apply -f backend-deployment-1125.yaml'
+                        sh 'kubectl apply -f frontend-deployment-1125.yaml'
+                        sh 'kubectl apply -f mongodb-deployment-1125.yaml'
+                    }
+                }
+            }
+        }
+
+        stage('Scale_and_Test_1125') {
+            steps {
+                script {
+                    echo 'Scaling and testing the deployment...'
+                    sh 'kubectl scale deployment backend-deployment-1125 --replicas=5'
+                    sh 'kubectl scale deployment frontend-deployment-1125 --replicas=5'
+                    // Add any additional test commands here
                 }
             }
         }
