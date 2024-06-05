@@ -13,7 +13,7 @@ pipeline {
             steps {
                 script {
                     echo 'Checking out code from GitHub...'
-                    git credentialsId: "${env.GITHUB_CREDENTIALS}", url: 'https://github.com/your-github-username/your-repo.git'
+                    git credentialsId: "${env.GITHUB_CREDENTIALS}", url: 'https://github.com/NUCESFAST/scd-final-lab-exam-HamayalSheikh.git'
                 }
             }
         }
@@ -37,7 +37,7 @@ pipeline {
                 script {
                     echo 'Building Docker image for backend...'
                     dir('backend') {
-                        sh 'docker build -t your-dockerhub-username/backend:latest .'
+                        sh 'docker build -t hamayal/backend:latest .'
                     }
                 }
             }
@@ -48,7 +48,7 @@ pipeline {
                 script {
                     echo 'Building Docker image for frontend...'
                     dir('frontend') {
-                        sh 'docker build -t your-dockerhub-username/frontend:latest .'
+                        sh 'docker build -t hamayal/frontend:latest .'
                     }
                 }
             }
@@ -59,7 +59,7 @@ pipeline {
                 script {
                     echo 'Pushing Docker image for backend to Docker Hub...'
                     sh 'echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin'
-                    sh 'docker push your-dockerhub-username/backend:latest'
+                    sh 'docker push hamayal/backend:latest'
                 }
             }
         }
@@ -69,7 +69,7 @@ pipeline {
                 script {
                     echo 'Pushing Docker image for frontend to Docker Hub...'
                     sh 'echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin'
-                    sh 'docker push your-dockerhub-username/frontend:latest'
+                    sh 'docker push hamayal/frontend:latest'
                 }
             }
         }
