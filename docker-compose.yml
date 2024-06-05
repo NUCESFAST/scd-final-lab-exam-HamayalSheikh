@@ -11,7 +11,7 @@ services:
 
   backend:
     build:
-      context: ./backend
+      context: ./Classrooms
       dockerfile: Dockerfile
     ports:
       - "3125:3125"
